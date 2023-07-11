@@ -13,6 +13,10 @@ function generateRandomString() {
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended: false }));
+
+
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -24,6 +28,15 @@ app.post("/urls", (req, res) => {
   urlDatabase[rndAlpha] = req.body.longURL;
   console.log(urlDatabase);
   res.redirect(`/urls/${rndAlpha}`); 
+});
+
+
+//deletes a url entry
+app.post ("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  console.log(urlDatabase);
+  res.redirect(`/urls/`);
+
 });
 
 app.get("/urls", (req, res) => {
