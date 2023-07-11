@@ -1,0 +1,2 @@
+const rnd = (len, chars='abcdefghijklmnopqrstuvwxyz0123456789') => [...Array(len)].map(() => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+console.log(rnd(6));
