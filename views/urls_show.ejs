@@ -21,9 +21,16 @@
           Short URL ID: <a href="/u/<%= id %>"><%= id %></a>
         </p>
       </div>
+      <div class="card-footer text-muted"></div>
+      <h2> Edit</h2>
+      <form method="POST" action="/urls/<%= id %>/" >
+        <input type="text" name ="longURL" value = "https://">
+        <input type="submit" value="Update" />
+      </form>
       <p> Here is the <a href="#">link</a> to shorten a URL.</p>
       <div class="card-footer text-muted"></div>
     </div>
+    
     <!-- Bootstrap JS -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
