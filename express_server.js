@@ -39,12 +39,22 @@ app.post ("/urls/:id/delete", (req, res) => {
 
 });
 
+//posts a cookie for the username
+app.post("/login", (req, res) => {
+  
+  console.log(req.body.username);
+  res.cookie('username',req.body.username);
+  res.redirect("/urls");
+});
+
+
 //posts an update to the URL database from the urls_show page
 app.post("/urls/:id/", (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.longURL;
   console.log(urlDatabase);
 });
+
 
 
 app.get("/urls", (req, res) => {
