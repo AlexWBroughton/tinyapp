@@ -41,12 +41,20 @@ app.post ("/urls/:id/delete", (req, res) => {
 
 });
 
+//posts a logout for a cookie
+app.post("/logout",(req, res) => {
+  res.clearCookie('username');
+  console.log("hello",res.cookies);
+  res.redirect("/urls");
+});
+
+
 //posts a cookie for the username
 app.post("/login", (req, res) => {
   
-  console.log(req.body.username);
-  res.cookie('username',req.body.username);
-  res.redirect("/urls");
+    console.log("login",req.body.username);
+    res.cookie('username',req.body.username);
+    res.redirect("/urls");
 });
 
 
