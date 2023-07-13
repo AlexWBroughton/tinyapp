@@ -81,9 +81,12 @@ app.post("/register", (req, res) => {
 
 //generates random short URL
 app.post("/urls", (req, res) => {
-  const rndAlpha = generateRandomString();
-  urlDatabase[rndAlpha] = req.body.longURL;
-  res.redirect(`/urls/${rndAlpha}`);
+  if (req.cookies.user){
+    const rndAlpha = generateRandomString();
+    urlDatabase[rndAlpha] = req.body.longURL;
+    res.redirect(`/urls/${rndAlpha}`);
+  }
+  res.send("You need to be logged in to generate new URLS!!!");
 });
 
 //deletes a url entry
@@ -138,28 +141,45 @@ app.post("/urls/:id/", (req, res) => {
 
 app.get("/login", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
+
+
+  if (req.cookies.user){
+    res.redirect("/urls");
+    return;
+  }
+  
   res.render("_login", templateVars);
 });
 
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
+
+  if (req.cookies.user){
+    res.redirect("/urls");
+    return;
+  }
   res.render("_register", templateVars);
 });
 
 app.get("/urls", (req, res) => {
-  console.log('here in urls get', req.cookies["user"]);
-  console.log(users[req.cookies["user"]]);
+
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
   res.render("urls_index", templateVars);
 });
 
+
 app.get("/urls/new", (req, res) => {
   const templateVars = { user: users[req.cookies["user"]] };
-  res.render("urls_new", templateVars);
+
+  if (req.cookies.user){
+    res.render("urls_new", templateVars);
+    return;
+  }
+  res.redirect("/login");
 });
 
 app.get("/urls/:id", (req, res) => {
-  console.log(req.params.id);
+
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
@@ -169,9 +189,14 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  console.log(urlDatabase[req.params.id]);
-  const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  console.log(req.params);
+  if (urlDatabase[req.params.id]){
+    const longURL = urlDatabase[req.params.id];
+    console.log(longURL);
+    res.redirect(longURL);
+    return;
+  }
+  res.send("That short URL ID is not in our database.");
 });
 
 app.listen(PORT, () => {
