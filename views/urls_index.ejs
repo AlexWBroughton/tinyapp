@@ -33,11 +33,11 @@
           <% for (let id in urls) { %>
             <tr>
               <td><%= id %></td>
-              <td><%= urls[id] %></td>
+              <td><%= urls[id].longURL %></td>
               <td> <form action="http://localhost:8080/urls/<%= id %>">
                 <input type = "submit" value ="Edit" /> 
               </form>
-                 </td>
+                </td>
               <td><form method="POST" action="/urls/<%= id %>/delete"> 
                 <input type = "submit" value ="Delete" />
               </form></td>
