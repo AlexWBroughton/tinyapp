@@ -18,18 +18,19 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    <% if(username){ %>
+    <% if(user){ %>
       <form method="POST" action="/logout" >
-        <h1> <%= username %> </h1>
+        <h1> <%= user.email %> </h1>
         <button type="submit">Logout</button>
       </form>
     <% } else{ %>  
       <form method="POST" action="/login" >
-        <h1> <%= username %> </h1>
-        <input type="text" placeholder="Username"  name="username">
+        <h1>  login  </h1>
+        <input type="text" placeholder="email"  name="email">
         <button type="submit">Login</button>
       </form>
    <% } %>
 
   </nav>
+  <title>Tiny App</title>
 </header>
