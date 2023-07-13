@@ -1,4 +1,8 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const cookieParser = require("cookie-parser");
+const bodyParser = require("body-parser");
+
 const app = express();
 const PORT = 8080; // default port 8080
 
@@ -28,9 +32,7 @@ const urlDatabase = {
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
-const cookieParser = require("cookie-parser");
 const { get } = require("request");
 app.use(cookieParser());
 
@@ -70,8 +72,11 @@ const urlsForUser = function(id){
 //registration post
 app.post("/register", (req, res) => {
   const newUser = req.body;
-  console.log("hello", newUser);
   const newUserId = generateRandomString();
+
+  //hashing password
+  const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+
 
   //error check...
   if (!newUser.email) {
@@ -84,17 +89,31 @@ app.post("/register", (req, res) => {
     res.send("Please enter a valid password");
     return;
   }
-  //check the newUser email against current database
-  //if there's no matching email then happy path.
-
-
   if (getUserByEmail(newUser.email)) {
     res.status(400).send("Error 400: Please enter a valid email - email already registered.");;
     return;
   }
-  newUser["id"] = newUserId;
+  
+  //refactor for readability
+  /*newUser["id"] = newUserId;
+    console.log('newUser["id"]   ' + newUser["id"]);
   users[newUserId] = newUser;
-  console.log(users);
+    console.log('users[newUserId]   ' + users[newUserId]);
+  users[newUserId]['hashedPassword'] = hashedPassword;
+    console.log('users[newUserId][hashedPassword]   ' + users[newUserId][hashedPassword]);*/
+
+    
+
+
+  users[newUserId]= {
+    id: newUserId,
+    email: newUser.email,
+    password: newUser.password,
+    hashedPassword: hashedPassword
+  }
+
+  console.log(users[newUserId]);
+
   res.cookie("user", newUserId);
   res.redirect(`/urls`);
 });
@@ -167,7 +186,7 @@ app.post("/login", (req, res) => {
   //check if passwords match...
   const userId = getUserByEmail(loginUser.email);
   console.log(userId.password, loginUser.password);
-  if (userId.password !== loginUser.password){
+  if (!bcrypt.compareSync(loginUser.password, userId.hashedPassword)) {
     res.status(403).send("Error 403:  Incorrect password.");
     return;
   }
@@ -262,6 +281,10 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   console.log("here in /urls/:id get");
   const userURLS = urlsForUser(req.cookies.user);
+
+  if (!req.cookies.user){
+    res.send("Please login to view URLS");
+  }
 
   for (const url in userURLS){
     if (url === req.params.id ){
