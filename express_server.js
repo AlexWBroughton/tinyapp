@@ -66,7 +66,6 @@ const urlsForUser = function (id) {
       urlOb[url] = tempOb;
     }
   }
-  console.log("urlsForUser", urlOb);
   return urlOb;
 };
 
@@ -131,16 +130,13 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!req.session.id) {
     res.send("Please login in order to delete a URLS");
   }
-  console.log(urlDatabase);
-  console.log(urlsForUser(req.session.id));
+  
   for (url in urlDatabase) {
     if (url === urlID) {
       const userURLS = urlsForUser(req.session.id);
       for (userURL in userURLS) {
         if (userURL === urlID) {
           delete urlDatabase[urlID];
-          console.log(urlDatabase);
-          console.log(urlsForUser(req.session.id));
           res.redirect(`/urls/`);
           return;
         }
@@ -235,7 +231,6 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  console.log(req.session.user_id);
   for (userID in users) {
     if (users[userID].id === req.session.id) {
       const userURLS = urlsForUser(req.session.id);
@@ -259,7 +254,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  console.log("here in /urls/:id get");
   const userURLS = urlsForUser(req.session.id);
 
   if (!req.session.id) {
@@ -273,7 +267,6 @@ app.get("/urls/:id", (req, res) => {
         longURL: urlDatabase[req.params.id],
         user: users[req.cookies["user"]],
       };
-      console.log("templateVars", templateVars);
       res.render("urls_show", templateVars);
       return;
     }
@@ -282,10 +275,8 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  console.log("here in /u/:id", urlDatabase[req.params.id]);
   if (urlDatabase[req.params.id]) {
     const longURL = urlDatabase[req.params.id].longURL;
-    console.log(longURL);
     res.redirect(longURL);
     return;
   }
@@ -293,5 +284,4 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
 });
