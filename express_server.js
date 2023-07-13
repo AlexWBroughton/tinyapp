@@ -96,7 +96,7 @@ app.post("/urls/:id/delete", (req, res) => {
 //posts a logout for a cookie
 app.post("/logout", (req, res) => {
   res.clearCookie("user");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 //posts a login to generate a cookie..
