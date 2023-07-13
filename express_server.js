@@ -3,16 +3,16 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 const users = {
-  Alice: {
+  'abc': {
     id: "abc",
     email: "a@a.com",
     password: "1234",
   },
-  Bob: {
+  'def': {
     id: "def",
     email: "b@b.com",
     password: "5678",
-  },
+  }
 };
 
 const urlDatabase = {
@@ -25,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: false }));
 const cookieParser = require("cookie-parser");
+const { get } = require("request");
 app.use(cookieParser());
 
 function generateRandomString() {
@@ -39,10 +40,9 @@ function generateRandomString() {
 const getUserByEmail = function (email) {
   for (const userID in users) {
     if (email === users[userID].email) {
-      return true;
+      return users[userID];
     }
   }
-  return false;
 };
 
 //registration post
@@ -65,17 +65,19 @@ app.post("/register", (req, res) => {
   //check the newUser email against current database
   //if there's no matching email then happy path.
 
+
   if (getUserByEmail(newUser.email)) {
-    res.status(400);
-    res.send("Please enter a valid email - email already registered.");
+    res.status(400).send("Error 400: Please enter a valid email - email already registered.");;
     return;
   }
   newUser["id"] = newUserId;
   users[newUserId] = newUser;
   res.cookie("user", newUserId);
   res.redirect(`/urls`);
-  return;
 });
+
+//POSTS
+
 
 //generates random short URL
 app.post("/urls", (req, res) => {
@@ -97,15 +99,32 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-//posts a cookie for the user
+//posts a login to generate a cookie..
 app.post("/login", (req, res) => {
-  const userEmail = req.body.email;
 
-  for (const userId in users) {
-    console.log(userId);
-    console.log(users[userId].email);
-    if (users[userId].email === userEmail) res.cookie("user", userId);
+  //email?
+  if (!req.body.email){
+    res.status(403).send("Error 403:  Please enter an email and password.");
+    return;
   }
+
+  const loginUser = req.body;
+
+  //check our database to see if the email matches our records....
+  if (!getUserByEmail(loginUser.email)){
+    res.status(403).send("Error 403:  That email is not currently in our database.");
+    return;
+  }
+
+  //check if passwords match...
+  const userId = getUserByEmail(loginUser.email);
+  console.log(userId.password, loginUser.password);
+  if (userId.password !== loginUser.password){
+    res.status(403).send("Error 403:  Incorrect password.");
+    return;
+  }
+  //happy path
+  res.cookie("user", userId.id);
   res.redirect("/urls");
 });
 
@@ -117,12 +136,19 @@ app.post("/urls/:id/", (req, res) => {
 
 //GETS
 
+app.get("/login", (req, res) => {
+  const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
+  res.render("_login", templateVars);
+});
+
 app.get("/register", (req, res) => {
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
   res.render("_register", templateVars);
 });
 
 app.get("/urls", (req, res) => {
+  console.log('here in urls get', req.cookies["user"]);
+  console.log(users[req.cookies["user"]]);
   const templateVars = { urls: urlDatabase, user: users[req.cookies["user"]] };
   res.render("urls_index", templateVars);
 });

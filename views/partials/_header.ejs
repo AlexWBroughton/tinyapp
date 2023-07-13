@@ -15,8 +15,9 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
-        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/urls/new">Create New URL</a>        
       </div>
+        <h1><a  href="http://localhost:8080/register"> REGISTER</a></h1>
     </div>
     <% if(user){ %>
       <form method="POST" action="/logout" >
@@ -25,12 +26,9 @@
       </form>
     <% } else{ %>  
       <form method="POST" action="/login" >
-        <h1>  login  </h1>
-        <input type="text" placeholder="email"  name="email">
-        <button type="submit">Login</button>
+        <h1>  <a  href="http://localhost:8080/login">Login</a> </h1>
       </form>
    <% } %>
-
   </nav>
   <title>Tiny App</title>
 </header>
