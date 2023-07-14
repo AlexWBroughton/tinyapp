@@ -5,18 +5,18 @@ const bodyParser = require("body-parser");
 const { getUserByEmail } = require("./helpers");
 
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080; 
 
 const users = {
   abc: {
     id: "abc",
     email: "a@a.com",
-    password: "1234",
+    password: bcrypt.hashSync("1234",10)
   },
   def: {
     id: "def",
     email: "b@b.com",
-    password: "5678",
+    password: bcrypt.hashSync("5678",10)
   },
 };
 
@@ -40,8 +40,7 @@ app.use(
     name: "session",
     keys: ["iamsecretstring"],
 
-    // Cookie Options
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, 
   })
 );
 
@@ -99,10 +98,11 @@ app.post("/register", (req, res) => {
     return;
   }
 
+  //stores new user data in the users object
   users[newUserId] = {
     id: newUserId,
     email: newUser.email,
-    hashedPassword: hashedPassword,
+    password: hashedPassword,
   };
 
   req.session.id = newUserId;
@@ -130,7 +130,8 @@ app.post("/urls/:id/delete", (req, res) => {
   if (!req.session.id) {
     res.send("Please login in order to delete a URLS");
   }
-  
+
+  //only users that have the URL in their repo are allowed to delete.
   for (url in urlDatabase) {
     if (url === urlID) {
       const userURLS = urlsForUser(req.session.id);
@@ -172,9 +173,9 @@ app.post("/login", (req, res) => {
 
   //check if passwords match...
   const userId = getUserByEmail(loginUser.email, users);
-
-  if (!bcrypt.compareSync(loginUser.password, userId.hashedPassword)) {
-    res.status(403).send("Error 403:  Incorrect passwo rd.");
+  console.log(userId);
+  if (!bcrypt.compareSync(loginUser.password, userId.password)) {
+    res.status(403).send("Error 403:  Incorrect password.");
     return;
   }
   //happy path
@@ -190,6 +191,9 @@ app.post("/urls/:id/", (req, res) => {
     return;
   }
 
+  
+
+  //happy path
   for (id in urlDatabase) {
     if (shortURL === id) {
       urlDatabase[id].longURL = req.body.longURL;
@@ -197,7 +201,7 @@ app.post("/urls/:id/", (req, res) => {
       return;
     }
   }
-
+  //check for user ownership of URL
   for (const url in urlDatabase) {
     if (url === shortURL) {
       res.send("You do not own this URL.");
@@ -210,9 +214,11 @@ app.post("/urls/:id/", (req, res) => {
 ///////////////////GETS///////////////////////////////
 
 app.get("/login", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.session["id"]] };
+  const userId = req.session.id;
+  const user = users[userId];
+  const templateVars = { urls: urlDatabase, user: user };
 
-  if (req.session.id) {
+  if (user) {
     res.redirect("/urls");
     return;
   }
@@ -221,9 +227,12 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: users[req.session["id"]] };
+  const userId = req.session.id;
+  const user = users[userId];
+  const templateVars = { urls: urlDatabase, user: user };
 
-  if (req.session.id) {
+
+  if (user) {
     res.redirect("/urls");
     return;
   }
@@ -282,6 +291,10 @@ app.get("/u/:id", (req, res) => {
     return;
   }
   res.send("That short URL ID is not in our database.");
+});
+
+app.get("/logout", (req, res) => {
+  res.send("Please login and try again");
 });
 
 app.listen(PORT, () => {
