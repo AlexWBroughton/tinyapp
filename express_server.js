@@ -244,7 +244,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: users[req.cookies["user"]] };
+  const templateVars = { user: users[req.session.id] };
 
   if (req.session.id) {
     res.render("urls_new", templateVars);
@@ -265,7 +265,7 @@ app.get("/urls/:id", (req, res) => {
       const templateVars = {
         id: req.params.id,
         longURL: urlDatabase[req.params.id],
-        user: users[req.cookies["user"]],
+        user: users[req.session.id],
       };
       res.render("urls_show", templateVars);
       return;
@@ -277,6 +277,7 @@ app.get("/urls/:id", (req, res) => {
 app.get("/u/:id", (req, res) => {
   if (urlDatabase[req.params.id]) {
     const longURL = urlDatabase[req.params.id].longURL;
+    console.log(longURL);
     res.redirect(longURL);
     return;
   }
